@@ -13,7 +13,7 @@ Add this to your Flutter app to:
 Install the LazyLoadingListView package by adding the following to your project dependencies within the pubspec.yaml file:
 
 ```dart  
-lazy_loading_list_view: ^1.0.0  
+lazy_loading_list_view: ^0.0.2  
 ```  
 
 Add the following to the top of your file:
@@ -26,17 +26,14 @@ Create a LazyLoadingListView using the example below:
 
 ```dart  
 LazyLoadingListView<MyData>(  
-    loadItems: (page) async { 
+    loadItems: (int page) async { 
         // your function to load data for the given page 
+        return await getData(page: page);
     }, 
-    buildItem: (BuildContext context, MyData item) { 
+    buildItem: (BuildContext context, MyData item, int index) { 
         // your function to build list item 
         return MyListItem(item: item); 
     }, 
-    shimmerBuilder: (BuildContext context) { 
-        // Optionally provide a custom loading effect 
-        return MyCustomShimmer(); 
-    },
 )  
 ```  
 

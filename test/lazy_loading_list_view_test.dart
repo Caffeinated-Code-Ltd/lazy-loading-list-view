@@ -14,7 +14,7 @@ void main() {
     return page <= 2 ? mockData : [];
   }
 
-  Widget mockBuilder(BuildContext context, String item) {
+  Widget mockBuilder(BuildContext context, String item, int index) {
     return Text(item);
   }
 
