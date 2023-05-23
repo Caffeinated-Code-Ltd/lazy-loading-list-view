@@ -20,3 +20,7 @@ User can now override the default separatorBuilder to create there own custom se
 # 0.0.4
 
 Updated README.md to display example gifs
+
+# 0.0.5
+
+Updated README.md
