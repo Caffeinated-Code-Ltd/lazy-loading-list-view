@@ -1,7 +1,14 @@
 A package for creating a ListView that handles lazy loading, pagination, pull-to-refresh, and a custom empty state.
 
-https://github.com/Caffeinated-Code-Ltd/lazy-loading-list-view/doc/example_1.gif?raw=true
-https://github.com/Caffeinated-Code-Ltd/lazy-loading-list-view/doc/example_2.gif?raw=true
+
+
+
+<table>
+  <tr>
+    <td><img src="https://github.com/Caffeinated-Code-Ltd/lazy-loading-list-view/doc/example_1.gif" alt="Lazy Loading Example" width="200"></td>
+    <td><img src="https://github.com/Caffeinated-Code-Ltd/lazy-loading-list-view/doc/example_2.gif" alt="Pull To Refresh Example" width="200"></td>
+  </tr>
+</table>
 
 ## Features
 
@@ -18,7 +25,7 @@ Add this to your Flutter app to:
 Install the LazyLoadingListView package by adding the following to your project dependencies within the pubspec.yaml file:
 
 ```dart  
-lazy_loading_list_view: ^0.0.3  
+lazy_loading_list_view: ^0.0.4  
 ```  
 
 Add the following to the top of your file:
