@@ -1,4 +1,7 @@
-A Flutter package for creating a ListView with lazy loading and pagination.
+A package for creating a ListView that handles lazy loading, pagination, pull-to-refresh, and a custom empty state.
+
+https://github.com/Caffeinated-Code-Ltd/lazy-loading-list-view/doc/example_1.gif?raw=true
+https://github.com/Caffeinated-Code-Ltd/lazy-loading-list-view/doc/example_2.gif?raw=true
 
 ## Features
 
@@ -6,14 +9,16 @@ Add this to your Flutter app to:
 
 1. Create all ListView's throughout your project using a single reusable widget.
 2. Handle pagination within ListView's by simply calling a function to load more data.
-3. Create a unique loading state for your ListView's. By default the LazyLoadingListView will display a Shimmer effect list item when loading more data, similar to that seen in apps such as Facebook, LinkedIn, etc.
+3. Provides a default loading state when fetching more data. User can override this by providing there own loadingStateBuilder.
+4. Provides a default empty state when no data is returned. User can override this by providing there own emptyState Widget.
+5. Automatically handles pull-to-refresh functionality.
 
 ## Usage
 
 Install the LazyLoadingListView package by adding the following to your project dependencies within the pubspec.yaml file:
 
 ```dart  
-lazy_loading_list_view: ^0.0.2  
+lazy_loading_list_view: ^0.0.3  
 ```  
 
 Add the following to the top of your file:
@@ -32,8 +37,35 @@ LazyLoadingListView<MyData>(
     }, 
     buildItem: (BuildContext context, MyData item, int index) { 
         // your function to build list item 
-        return MyListItem(item: item); 
+        return MyCustomListItem(item: item); 
     }, 
+)  
+```  
+
+You can also customize the LazyLoadingListView further by overriding the separatorBuilder, loadingStateBuilder, emptyState, and pageSize:
+
+```dart  
+LazyLoadingListView<MyData>(  
+    loadItems: (int page) async { 
+        // your function to load data for the given page 
+        return await getData(page: page);
+    }, 
+    buildItem: (BuildContext context, MyData item, int index) { 
+        // your function to build list item 
+        return MyCustomListItem(item: item); 
+    }, 
+    separatorBuilder: (context, index) {
+        // define your own separator
+        return const SizedBox(height: 10);
+    },
+    loadingStateBuilder: (context) {
+        // your function to build a custom loading state
+        return const MyCustomLoadingState();
+    },
+    // provide your custom empty state widget
+    emptyState: MyEmptyState(),
+    // define your preferred page size
+    pageSize: 10,
 )  
 ```  
 

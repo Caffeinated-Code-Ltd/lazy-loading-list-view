@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lazy_loading_list_view/lazy_loading_list_view.dart';
-import 'package:shimmer/shimmer.dart';
 
 void main() {
   /// This is the mock data we'll use for testing
@@ -43,7 +42,7 @@ void main() {
     }
   });
 
-  testWidgets('LazyLoadingListView displays default shimmer while loading',
+  testWidgets('LazyLoadingListView displays default loading state when loading',
       (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: LazyLoadingListView(
@@ -52,23 +51,23 @@ void main() {
       ),
     ));
 
-    /// Validate that Shimmer effect is displayed while loading
-    expect(find.byType(Shimmer), findsOneWidget);
+    /// Validate that default loading state is displayed when loading
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     /// Wait for the loading to finish
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     /// Validate that the shimmer effect is gone
-    expect(find.byType(Shimmer), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
-  testWidgets('LazyLoadingListView displays custom shimmer while loading',
+  testWidgets('LazyLoadingListView displays custom loading state while loading',
       (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: LazyLoadingListView(
         loadItems: mockLoader,
         buildItem: mockBuilder,
-        shimmerBuilder: mockShimmerBuilder,
+        loadingStateBuilder: mockShimmerBuilder,
       ),
     ));
 

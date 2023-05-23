@@ -2,7 +2,6 @@ library lazy_loading_list_view;
 
 /// Import required packages
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 /// Defines a function that takes a page number and returns a Future of a List of items of type T
 typedef ItemLoader<T> = Future<List<T>> Function(int page);
@@ -11,8 +10,8 @@ typedef ItemLoader<T> = Future<List<T>> Function(int page);
 typedef ItemBuilder<T> = Widget Function(
     BuildContext context, T item, int index);
 
-/// Defines a function that takes a BuildContext and returns a Widget for Shimmer loading effect
-typedef ShimmerBuilder = Widget Function(BuildContext context);
+/// Defines a function that takes a BuildContext and returns a Widget
+typedef LoadingStateBuilder = Widget Function(BuildContext context);
 
 /// StatefulWidget that builds a ListView which loads data lazily
 class LazyLoadingListView<T> extends StatefulWidget {
@@ -22,9 +21,16 @@ class LazyLoadingListView<T> extends StatefulWidget {
   /// Function to build each item
   final ItemBuilder<T> buildItem;
 
-  /// Function to build the shimmer effect
-  final ShimmerBuilder? shimmerBuilder;
+  /// Function to build the optional separator
+  final IndexedWidgetBuilder? separatorBuilder;
 
+  /// Function to build the loading state
+  final LoadingStateBuilder? loadingStateBuilder;
+
+  /// Optional widget to display as the empty state
+  final Widget? emptyState;
+
+  /// Defines the page size for loading data. Defaults to 10.
   final int pageSize;
 
   /// Constructor for the widget
@@ -32,7 +38,9 @@ class LazyLoadingListView<T> extends StatefulWidget {
     Key? key,
     required this.loadItems,
     required this.buildItem,
-    this.shimmerBuilder,
+    this.separatorBuilder,
+    this.loadingStateBuilder,
+    this.emptyState,
     this.pageSize = 10,
   }) : super(key: key);
 
@@ -74,8 +82,8 @@ class _LazyLoadingListViewState<T> extends State<LazyLoadingListView<T>> {
   }
 
   /// Function to load more items
-  void _loadMore() {
-    /// Only load more items if it's not currently loading
+  Future<void> _loadMore() async {
+    /// Only load more items if it's not currently loading and there is more data to load
     if (!_loading && _canLoadMore) {
       setState(() {
         _loading = true;
@@ -86,47 +94,92 @@ class _LazyLoadingListViewState<T> extends State<LazyLoadingListView<T>> {
         setState(() {
           _items.addAll(newItems);
           _currentPage++;
-          _loading = false;
           _canLoadMore = newItems.length == widget.pageSize;
-          _onScroll();
+          _loading = false;
         });
       });
     }
   }
 
-  /// This is the default shimmer effect if none is provided by the user
-  Widget _defaultShimmer(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      child: Container(height: 50, color: Colors.white),
+  /// This is the default loading state if none is provided by the user
+  Widget _defaultLoader(BuildContext context) {
+    return const CircularProgressIndicator(
+      valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
     );
   }
 
-  /// Override the build method to return the ListView
+  bool get _isEmptyState =>
+      _items.isEmpty && _canLoadMore == false && _loading == false;
+
+  /// This is the default empty state if none is provided by the user
+  Widget _defaultEmptyState(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'Looks like there is no data',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton(
+            onPressed: () async => await _handleRefresh(),
+            child: Text(
+              'Refresh',
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Function to handle pull-to-refresh
+  Future<void> _handleRefresh() async {
+    setState(() {
+      _items.clear();
+      _currentPage = 0;
+      _canLoadMore = true;
+      _loading = false;
+    });
+    _loadMore();
+  }
+
+  /// Build the ListView
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      physics: const AlwaysScrollableScrollPhysics(),
-      controller: _scrollController,
-      itemCount: _items.length + (_loading ? 1 : 0),
-      itemBuilder: (context, index) {
-        /// Load more items if it reached the end of the list
-        if (index == _items.length) {
-          _loadMore();
+    return RefreshIndicator(
+      onRefresh: () async => await _handleRefresh(),
+      child: !_isEmptyState
+          ? ListView.separated(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: _items.length + (_loading ? 1 : 0),
+              itemBuilder: (context, index) {
+                /// Load more items if it reached the end of the list
+                if (index == _items.length) {
+                  /// Display the shimmer effect while loading
+                  return widget.loadingStateBuilder != null
+                      ? widget.loadingStateBuilder!(context)
+                      : _defaultLoader(context);
+                }
 
-          /// Display the shimmer effect while loading
-          return widget.shimmerBuilder != null
-              ? widget.shimmerBuilder!(context)
-              : _defaultShimmer(context);
-        }
+                /// Build each item using the provided function
+                return widget.buildItem(context, _items[index], index);
+              },
 
-        /// Build each item using the provided function
-        return widget.buildItem(context, _items[index], index);
-      },
+              /// Checks to see if user has provided a separator builder, else shows nothing
+              separatorBuilder: widget.separatorBuilder ??
+                  (context, index) {
+                    return const SizedBox.shrink();
+                  },
+            )
+          : widget.emptyState ?? _defaultEmptyState(context),
     );
   }
 
+  /// Dispose of the scroll controller
   @override
   void dispose() {
     _scrollController.dispose();

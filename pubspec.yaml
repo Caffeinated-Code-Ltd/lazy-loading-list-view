@@ -1,6 +1,6 @@
 name: lazy_loading_list_view
-description: A Flutter package for creating a ListView with lazy loading and pagination.
-version: 0.0.2
+description: A package for creating a ListView that handles lazy loading, pagination, pull-to-refresh, and a custom empty state.
+version: 0.0.3
 homepage: https://github.com/Caffeinated-Code-Ltd/lazy-loading-list-view
 
 environment:
@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  shimmer: ^2.0.0
 
 
 dev_dependencies:
