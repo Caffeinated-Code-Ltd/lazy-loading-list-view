@@ -16,3 +16,7 @@ Now includes a default empty state with option to override with your own Widget.
 Removed Shimmer dependency from package and replaced the default loading style to use a CircularProgressIndicator instead.
 Swapped ListView.builder out in favour of ListView.separated.
 User can now override the default separatorBuilder to create there own custom separator style.
+
+# 0.0.4
+
+Updated README.md to display example gifs
